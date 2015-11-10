@@ -17,6 +17,8 @@ import weka.core.Instances;
  */
 public class perceptronClassifier implements Classifier {
 
+    static int numberofiterations = 10;
+
     @Override
     public void buildClassifier(Instances i) throws Exception {
         perceptron(i);
@@ -39,24 +41,24 @@ public class perceptronClassifier implements Classifier {
 
     public static void perceptron(Instances ins) {
         double w[] = new double[ins.numAttributes()];
-        Arrays.fill(w, 1);//sets all values to 1 should be radomised
+        Arrays.fill(w, 1);//sets all weights to 1 should be radomised
         double n = 0.5;//learning rate
-        for (Instance instance : ins) {
-            int y = 0;
-            for (int i = 0; i < ins.numAttributes() - 1; i++) {
-                y += w[i] * (instance.value(i));
+        for (int h = 0; h < numberofiterations; h++)//stopping condition
+        {
+            for (Instance instance : ins) {
+                int y = 0;
+                for (int i = 0; i < ins.numAttributes() - 1; i++) {
+                    y += w[i] * (instance.value(i));
+                }
+                System.out.println(y);
+                int match = checkmatch(ins.get(0), y);
+                System.out.println(match);
+                for (int j = 0; j < ins.numAttributes() - 1; j++) {
+                    w[j] = w[j] + n * ((instance.classValue() - match) * instance.value(j));
+
+                }
+
             }
-            System.out.println(y);
-            int match = checkmatch(ins.get(0), y);
-            System.out.println(match);
-            for (int j = 0; j < ins.numAttributes() - 1; j++) {
-                w[j] = w[j] + n * ((instance.classValue() - match)*instance.value(j));
-            
-               
-            }
-                
-               
-            
         }
 
     }
@@ -65,8 +67,7 @@ public class perceptronClassifier implements Classifier {
 
         if (y > 0) {
             return 1;
-        }
-        else {
+        } else {
             return 0;
         }
     }
