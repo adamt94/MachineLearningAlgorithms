@@ -16,17 +16,25 @@ import weka.core.Instances;
  * @author adam
  */
 public class perceptronClassifier implements Classifier {
-
-    static int numberofiterations = 10;
-
+     static double w[];// weights
+     static int numberofiterations = 10; //stopping condition
+     static double n = 1;//learning rate
+    
     @Override
     public void buildClassifier(Instances i) throws Exception {
+        w = new double[i.numAttributes()-1];//weights
+        Arrays.fill(w, 1);//sets all values to 1 should be radomised
         perceptron(i);
     }
 
     @Override
     public double classifyInstance(Instance instnc) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+         int y = 0;
+            for (int i = 0; i < instnc.numAttributes() - 1; i++) {
+                y += w[i] * (instnc.value(i));
+            }
+            
+            return y;
     }
 
     @Override
@@ -40,9 +48,8 @@ public class perceptronClassifier implements Classifier {
     }
 
     public static void perceptron(Instances ins) {
-        double w[] = new double[ins.numAttributes()];
-        Arrays.fill(w, 1);//sets all weights to 1 should be radomised
-        double n = 0.5;//learning rate
+        
+        
         for (int h = 0; h < numberofiterations; h++)//stopping condition
         {
             for (Instance instance : ins) {
@@ -54,6 +61,7 @@ public class perceptronClassifier implements Classifier {
                 int match = checkmatch(ins.get(0), y);
                 System.out.println(match);
                 for (int j = 0; j < ins.numAttributes() - 1; j++) {
+                  
                     w[j] = w[j] + n * ((instance.classValue() - match) * instance.value(j));
 
                 }
@@ -71,4 +79,5 @@ public class perceptronClassifier implements Classifier {
             return 0;
         }
     }
+    
 }

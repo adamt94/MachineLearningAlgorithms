@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package machinelearningcw;
 
 import weka.classifiers.Classifier;
@@ -17,9 +16,17 @@ import weka.core.Instances;
  */
 public class EnchancedPerceptron implements Classifier {
 
+    static double w[];// weights
+    static int numberofiterations = 10; //stopping condition
+    static double n = 0.5;//learning rate
+    static boolean flag = true;
+
     @Override
     public void buildClassifier(Instances i) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (flag == true) {
+
+        }
+
     }
 
     @Override
@@ -36,5 +43,13 @@ public class EnchancedPerceptron implements Classifier {
     public Capabilities getCapabilities() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
+  public void standardizeAtrrbutes(Instances instances){
+        double means[] = new double[instances.numAttributes()-1];
+       for(int i =0; i<instances.numAttributes()-1;i++)
+       {
+           means[i] = instances.meanOrMode(i);
+       }
+    }
+
 }

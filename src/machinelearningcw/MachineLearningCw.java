@@ -21,13 +21,16 @@ public class MachineLearningCw {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-      Instances train = loadData("C:\\Users\\adam\\AppData\\Roaming\\Skype\\My Skype Received Files\\question1-train.arff");
+        Instances train = loadData("C:\\Users\\adam\\AppData\\Roaming\\Skype\\My Skype Received Files\\question1-train.arff");
         perceptronClassifier p = new perceptronClassifier();
-          train.setClassIndex(train.numAttributes()-1);
-          System.out.println(train);
+        train.setClassIndex(train.numAttributes() - 1);
+        
+        System.out.println(train);
         p.buildClassifier(train);
+
     }
-     public static Instances loadData(String path) {
+
+    public static Instances loadData(String path) {
         FileReader reader;
         Instances instances = null;
         try {
@@ -39,5 +42,4 @@ public class MachineLearningCw {
         return instances;
     }
 
-    
 }
