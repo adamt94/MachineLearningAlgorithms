@@ -23,10 +23,13 @@ public class MachineLearningCw {
     public static void main(String[] args) throws Exception {
         Instances train = loadData("C:\\Users\\adam\\AppData\\Roaming\\Skype\\My Skype Received Files\\question1-train.arff");
         perceptronClassifier p = new perceptronClassifier();
+        EnchancedPerceptron ep = new EnchancedPerceptron();
         train.setClassIndex(train.numAttributes() - 1);
         
         System.out.println(train);
-        p.buildClassifier(train);
+        ep.buildClassifier(train);
+        System.out.println(train);
+      
 
     }
 
