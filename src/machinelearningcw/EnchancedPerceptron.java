@@ -9,7 +9,9 @@ import java.util.Arrays;
 import static machinelearningcw.perceptronClassifier.numberofiterations;
 import static machinelearningcw.perceptronClassifier.w;
 import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.core.Capabilities;
+import weka.core.Debug.Random;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.experiment.Stats;
@@ -22,7 +24,7 @@ public class EnchancedPerceptron implements Classifier {
 
     static double w[];// weights
     static int numberofiterations = 1; //stopping condition
-    static double learnig_rate = 0.5;  //learning rate
+    static double learnig_rate = 1;  //learning rate
     boolean flag = true;
     static double means[];// the means for each attribute 
     static double std[]; //the standard deviations for each attribute
@@ -39,6 +41,10 @@ public class EnchancedPerceptron implements Classifier {
             offlinePerceptron(i);
           
 
+        }
+        if(flag==false)
+        {
+            perceptron(i);
         }
 //
     }
@@ -72,7 +78,7 @@ public class EnchancedPerceptron implements Classifier {
                 int match = checkmatch(ins.get(0), y);
                 for (int j = 0; j < ins.numAttributes() - 1; j++) {
 
-                    changeinWeights[j] = changeinWeights[j] + learnig_rate * ((instance.classValue() - match) * instance.value(j));
+                    changeinWeights[j] = changeinWeights[j] + (0.5*learnig_rate) * ((instance.classValue() - match) * instance.value(j));
 
                 }
 
@@ -85,6 +91,30 @@ public class EnchancedPerceptron implements Classifier {
 
             }
 
+        }
+       
+
+    }
+     public static void perceptron(Instances ins) {
+        
+        
+        for (int h = 0; h < numberofiterations; h++)//stopping condition
+        {
+            for (Instance instance : ins) {
+                int y = 0;
+                for (int i = 0; i < ins.numAttributes() - 1; i++) {
+                    y += w[i] * (instance.value(i));
+                }
+                System.out.println(y);
+                int match = checkmatch(ins.get(0), y);
+                System.out.println(match);
+                for (int j = 0; j < ins.numAttributes() - 1; j++) {
+                  
+                    w[j] = w[j] + (0.5*learnig_rate) * ((instance.classValue() - match) * instance.value(j));
+
+                }
+
+            }
         }
 
     }
@@ -124,6 +154,38 @@ public class EnchancedPerceptron implements Classifier {
         System.out.println(x);
 
         return x;
+    }
+    
+    public void crossValidation(Instances ins){
+        //get the data
+        Instances data = new Instances(ins);
+        Instances train;// the new training data
+        Instances test; // the new testing data
+        int seed = 0; 
+        Random rand = new Random(seed);
+        //randomize the data
+        data.randomize(rand);
+       
+        //number of folds
+        int folds = 10;
+         
+        for(int i =0; i<folds; i++)
+        {
+             train = data.trainCV(folds, i);
+             test = data.testCV(folds, i);
+             offlinePerceptron(train);
+             
+            
+            
+        }
+        
+        
+        
+       
+    }
+    
+    public void randomLinearPerceptron(Instances ins){
+        
     }
 
 }
