@@ -82,7 +82,7 @@ public class RandomLinearPerceptron implements Classifier {
     public void randomLinearPerceptron(Instances ins) throws Exception {
         ensemble = new EnchancedPerceptron[500]; //default size 500
         //get the amount of attributes to remove
-        int removeAttributes = (ins.numAttributes() - 1) - (int) Math.sqrt(ins.numAttributes() - 1);
+        int removeAttributes = (int) Math.sqrt(ins.numAttributes() - 1);
       
         //initialise the array for storing the attributes removed
         attributesdeleted = new int[ensemble.length][removeAttributes];
@@ -92,7 +92,7 @@ public class RandomLinearPerceptron implements Classifier {
           //  System.out.println("length: "+ensemble.length);
             //build the classifier with the random attributes
             
-            ensemble[i].buildClassifier(randomAttributes(ins, 0, removeAttributes));
+            ensemble[i].buildClassifier(randomAttributes(ins, i, removeAttributes));
           //  System.out.println("============== " + 0);
         }
 
@@ -105,23 +105,27 @@ public class RandomLinearPerceptron implements Classifier {
         Remove r = new Remove();//class to remove attributes
       
         for (int i = 0; i < ins.numAttributes() - 1; i++) {
-
+            
             remove.add(i);
         }
 
         //shuffle the arraylist to get random numbers
         Collections.shuffle(remove);
         //remove attributes position numbers from the arraylist
+       
         for (int i = 0; i < removeAttributes; i++) {
-            remove.remove(i);
+            
+             //save the deleted attributes removed to array
+            attributesdeleted[position][i] = remove.remove(i);
         }
+      
+       
         //add the arraylist to an array to use the remove method 
         int[] temp = new int[remove.size()];
-          
+     
         for (int i = 0; i < temp.length; i++) {
             temp[i] = remove.get(i);
-            //save the deleted attributes removed to array
-            attributesdeleted[position][i] = temp[i];
+           
 
         }
 

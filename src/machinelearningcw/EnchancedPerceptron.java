@@ -192,7 +192,7 @@ public class EnchancedPerceptron implements Classifier {
         for (Instance i : ins) {
             for (int n = 0; n < i.numAttributes() - 1; n++) {
                 double x = ((i.value(n) - means[n]) / std[n]);
-
+               
                 i.setValue(n, x);
                 
             }
