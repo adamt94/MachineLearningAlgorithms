@@ -6,6 +6,7 @@
 package machinelearningcw;
 
 import java.util.Arrays;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Debug.Random;
@@ -17,14 +18,14 @@ import weka.experiment.Stats;
  *
  * @author ypf12pxu
  */
-public class EnchancedPerceptron implements Classifier {
+public class EnchancedPerceptron extends AbstractClassifier {
 
     public double w[];// weights
     public int numberofiterations = 100; //stopping condition
     public double learning_rate = 1;  //learning rate
     public boolean setCrossvalidate = true;//set crossvalidation
-    public boolean setStandardiseAttributes = true; // set stdandisation
-    public boolean crossvalidate = false; //decides which algorithm to pick offline/online
+    public boolean setStandardiseAttributes = false; // set stdandisation
+    public boolean onlineoroffline = false; //decides which algorithm to pick offline/online
 
     public double means[];// the means for each attribute 
     public double std[]; //the standard deviations for each attribute
@@ -36,28 +37,32 @@ public class EnchancedPerceptron implements Classifier {
         Arrays.fill(w, 1);//sets all values to 1 should be radomised
         Instances temp = new Instances(i);
         if (setCrossvalidate) {
-            crossvalidate = crossValidation(i);
+            onlineoroffline = crossValidation(i);
         }
       //  System.out.println("using online: "+ crossvalidate);
         Arrays.fill(w, 1);//sets all values to 1 should be radomised
 
         // System.out.println(crossvalidate);
         //crossvalidate = false;
-        if (crossvalidate == true) {
+      
+      
+        if (onlineoroffline == true) {
             calculateMeansAndSTDev(temp);
             if (setStandardiseAttributes) {
-                temp = standardizeAtrrbutes(temp);
+                standardizeAtrrbutes(temp);
+                
             }
-            //  System.out.println(temp);
+             
             double b = perceptron(temp);
          //   System.out.println("error count: " + b);
 
         }
-        if (crossvalidate == false) {
+        if (onlineoroffline == false) {
             calculateMeansAndSTDev(temp);
             if (setStandardiseAttributes) {
-                temp = standardizeAtrrbutes(temp);
+                standardizeAtrrbutes(temp);
             }
+          
             double c = offlinePerceptron(temp);
         //    System.out.println("error count " + c);
 
@@ -71,6 +76,7 @@ public class EnchancedPerceptron implements Classifier {
     @Override
     public double classifyInstance(Instance instnc) throws Exception {
         double y = 0;
+      
         for (int i = 0; i < instnc.numAttributes() - 1; i++) {
             y += w[i] * (instnc.value(i));
         }
@@ -80,19 +86,12 @@ public class EnchancedPerceptron implements Classifier {
         return (y >= 0) ? 1 : 0;
     }
 
-    @Override
-    public double[] distributionForInstance(Instance instnc) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Capabilities getCapabilities() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+ 
 
     public double offlinePerceptron(Instances ins) {
         double error_count = 0;//count the number of errors
         double changeinWeights[];
+      
         for (int h = 0; h < numberofiterations; h++) {
             changeinWeights = new double[ins.numAttributes() - 1];
             //error_count = 0;
@@ -132,6 +131,7 @@ public class EnchancedPerceptron implements Classifier {
 
         }
         error_count = error_count/numberofiterations;// average error count
+       
         return error_count;
     }
 
@@ -162,11 +162,13 @@ public class EnchancedPerceptron implements Classifier {
                     // System.out.print(w[j] + ", ");
 
                 }
-
+                
                 error_count += difference * difference;
             }
         }
         return error_count;
+      
+        
 
     }
 
@@ -241,8 +243,8 @@ public class EnchancedPerceptron implements Classifier {
             }
 
         }
-       System.out.println(" off: " + offlineErrors);
-        System.out.println(" on: " + onlineErrors);
+     //  System.out.println(" off: " + offlineErrors);
+    //    System.out.println(" on: " + onlineErrors);
         //calculate the mean of the total errors
         offlineErrors = offlineErrors / folds;
         onlineErrors = onlineErrors / folds;

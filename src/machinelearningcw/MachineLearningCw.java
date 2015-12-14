@@ -5,12 +5,15 @@
  */
 package machinelearningcw;
 
+import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.classifiers.evaluation.Prediction;
 import weka.core.Capabilities;
+import weka.core.Debug;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -24,23 +27,42 @@ public class MachineLearningCw {
      * @param args the command line arguments
      * @throws java.lang.Exception
      */
+    
+    static ArrayList<String> fileNames;
+    
     public static void main(String[] args) throws Exception {
-        // Instances train = loadData("C:\\Users\\adam\\AppData\\Roaming\\Skype\\My Skype Received Files\\question1-train.arff");
-        Instances train = loadData("\\\\ueahome4\\stusci5\\ypf12pxu\\data\\Documents\\Machine Learning\\cancer\\cancer-train.arff");
-        Instances test = loadData("\\\\ueahome4\\stusci5\\ypf12pxu\\data\\Documents\\Machine Learning\\cancer\\cancer-test.arff");
-        test.setClassIndex(test.numAttributes() - 1);
-        train.setClassIndex(train.numAttributes() - 1);
-       // System.out.println(train);
-        compareAlgorithms(train, test);
-        standardiseData(train, test);
-        crossValidation(train, test);
-      //  RandomLinearPerceptron p = new RandomLinearPerceptron();
-     //   p.buildClassifier(train);
-      //  System.out.println(getAccuracy(p,train));
-        
-        // perceptron(train, test);
-        //  EnchancedPerceptron(train, test);
-        //   RandomLinearPerceptron(train,test);
+        //   Instances data = loadData("C:\\Users\\adam\\AppData\\Roaming\\Skype\\My Skype Received Files\\question1-train.arff");
+        Instances data [] = getAllFiles();
+        for (int i = 0; i < data.length; i++) {
+           
+            System.out.println("==============="+fileNames.get(i)+"=============");
+            data[i].setClassIndex(data[i].numAttributes() - 1);
+
+           
+            compareAlgorithms(data[i]);
+            standardiseData(data[i]);
+            crossValidation(data[i]);
+         //   RandomLinearPerceptron(data);
+        }
+
+   
+    }
+
+    public static Instances[] getAllFiles() {
+        File folder = new File("data_sets/");
+        File[] listOfFiles = folder.listFiles();
+        fileNames = new ArrayList();
+        Instances[] ins = new Instances[listOfFiles.length];
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (listOfFiles[i].isFile()) {
+                //get the names of all the datasets
+               fileNames.add(listOfFiles[i].getName());
+               //gets all the datasets paths and loads the data into instances
+                ins[i] = loadData(listOfFiles[i].getPath());
+               
+            }
+        }
+        return ins;
     }
 
     public static Instances loadData(String path) {
@@ -55,11 +77,18 @@ public class MachineLearningCw {
         return instances;
     }
 
-    public static double getAccuracy(Classifier s,Instances instances) throws Exception {
+    public static void compareAlgorithms(Instances data) throws Exception {
+        System.out.println("Compare Algorithms");
+        EnchancedPerceptron ep = new EnchancedPerceptron();
+        ep.onlineoroffline = false;// set to choice offline
+        ep.numberofiterations = 100;
+        ep.setCrossvalidate = false;
+        ep.setStandardiseAttributes = false;
+
         int numFolds = 10;
         EvaluationUtils eval = new EvaluationUtils();
         ArrayList<Prediction> preds
-                = eval.getCVPredictions(s, instances, numFolds);
+                = eval.getCVPredictions(ep, data, numFolds);
         int correct = 0;
         int total = 0;
         for (Prediction pred : preds) {
@@ -68,115 +97,118 @@ public class MachineLearningCw {
             }
             total++;
         }
-        double acc = (double) correct / total;
-        return acc;
-    }
+        double acc = ((double) correct / total) * 100;
 
-    public static void compareAlgorithms(Instances train, Instances test) throws Exception {
-        System.out.println("Compare Algorithms");
-        EnchancedPerceptron ep = new EnchancedPerceptron();
-        ep.crossvalidate = false;// set to choice offline
-        ep.numberofiterations = 100;
-        ep.setCrossvalidate = false;
-        ep.setStandardiseAttributes = false;
-   
-        ep.buildClassifier(train);
-        double errors = 0;
-        for (Instance i : test) {
-
-            errors += (i.classValue() - ep.classifyInstance(i)) * (i.classValue() - ep.classifyInstance(i));
-            //System.out.println(errors);
-        }
-
-        System.out.println("original errors: " + errors);
-        double per = (test.numInstances() - errors) / test.numInstances() * 100;
-        System.out.println("Offline Accuracy: " + per);
-        errors = 0;
+        System.out.println("Offline Accuracy: " + acc);
 
         perceptronClassifier p = new perceptronClassifier();
-        p.buildClassifier(train);
-
-        for (Instance i : test) {
-
-            errors += (i.classValue() - p.classifyInstance(i)) * (i.classValue() - p.classifyInstance(i));
-            //System.out.println(errors);
+        numFolds = 10;
+        eval = new EvaluationUtils();
+        ArrayList<Prediction> preds2
+                = eval.getCVPredictions(p, data, numFolds);
+        correct = 0;
+        total = 0;
+        for (Prediction pred : preds2) {
+            if (pred.predicted() == pred.actual()) {
+                correct++;
+            }
+            total++;
         }
-        System.out.println("original errors: " + errors);
-        per = (test.numInstances() - errors) / test.numInstances() * 100;
-        System.out.println("Online Accuracy: " + per);
+        acc = ((double) correct / total) * 100;
+
+        System.out.println("Online Accury: " + acc);
     }
 
-    public static void standardiseData(Instances train, Instances test) throws Exception {
+    public static void standardiseData(Instances data) throws Exception {
         System.out.println("\n" + "Compare Algorithms with standiasation");
         EnchancedPerceptron ep = new EnchancedPerceptron();
-        ep.crossvalidate = false;// set to choice offline
+        ep.onlineoroffline = false;// set to choice offline
         ep.numberofiterations = 100;
         ep.setCrossvalidate = false;
         ep.setStandardiseAttributes = true;//std attributes
         //standardise the test instances 
-        Instances test2 = new Instances(test);
 
-        ep.buildClassifier(train);
-        ep.standardizeAtrrbutes(test2);
-        double per = 0;
-        double errors = 0;
-        for (Instance i : test2) {
-
-            errors += (i.classValue() - ep.classifyInstance(i)) * (i.classValue() - ep.classifyInstance(i));
-            //System.out.println(errors);
+        int numFolds = 10;
+        EvaluationUtils eval = new EvaluationUtils();
+        ArrayList<Prediction> preds
+                = eval.getCVPredictions(ep, data, numFolds);
+        int correct = 0;
+        int total = 0;
+        for (Prediction pred : preds) {
+            if (pred.predicted() == pred.actual()) {
+                correct++;
+            }
+            total++;
         }
-        System.out.println("original errors: " + errors);
-        per = (test2.numInstances() - errors) / test2.numInstances() * 100;
-        System.out.println("offline Accuracy: " + per);
+        double acc = ((double) correct / total) * 100;
 
-        ep.crossvalidate = true;
-        ep.buildClassifier(train);
-        errors = 0;
-        for (Instance i : test2) {
+        System.out.println("Offline Accuracy: " + acc);
 
-            errors += (i.classValue() - ep.classifyInstance(i)) * (i.classValue() - ep.classifyInstance(i));
-            //System.out.println(errors);
+        ep.onlineoroffline = true;
+
+        numFolds = 10;
+        eval = new EvaluationUtils();
+        ArrayList<Prediction> preds2
+                = eval.getCVPredictions(ep, data, numFolds);
+        correct = 0;
+        total = 0;
+        for (Prediction pred : preds2) {
+            if (pred.predicted() == pred.actual()) {
+                correct++;
+            }
+            total++;
         }
-        System.out.println("original errors: " + errors);
-        per = (test2.numInstances() - errors) / test2.numInstances() * 100;
-        System.out.println("Online Accuracy: " + per);
+        acc = ((double) correct / total) * 100;
+
+        System.out.println("Online Accury: " + acc);
     }
 
-    public static void crossValidation(Instances train, Instances test) throws Exception {
+    public static void crossValidation(Instances data) throws Exception {
         System.out.println("\n" + "CrossValidation");
         EnchancedPerceptron ep = new EnchancedPerceptron();
         ep.numberofiterations = 100;
         ep.setCrossvalidate = true;
         ep.setStandardiseAttributes = false;//std attributes
 
-        ep.buildClassifier(train);
-        double per = 0;
-        double errors = 0;
-        for (Instance i : test) {
-
-            errors += (i.classValue() - ep.classifyInstance(i)) * (i.classValue() - ep.classifyInstance(i));
-            //System.out.println(errors);
+        int numFolds = 10;
+        EvaluationUtils eval = new EvaluationUtils();
+        ArrayList<Prediction> preds
+                = eval.getCVPredictions(ep, data, numFolds);
+        int correct = 0;
+        int total = 0;
+        for (Prediction pred : preds) {
+            if (pred.predicted() == pred.actual()) {
+                correct++;
+            }
+            total++;
         }
-        System.out.println("original errors: " + errors);
-        per = (test.numInstances() - errors) / test.numInstances() * 100;
-        System.out.println("Online Accuracy: " + per);
+        double acc = ((double) correct / total) * 100;
+        if (ep.onlineoroffline) {
+            System.out.println("picked: online " + "Accuracy " + acc);
+        } else {
+            System.out.println("picked: offline " + "Accuracy " + acc);
+        }
     }
 
-    public static void perceptron(Instances train, Instances test) throws Exception {
+    public static void perceptron(Instances data) throws Exception {
         perceptronClassifier p = new perceptronClassifier();
-        test.setClassIndex(test.numAttributes() - 1);
-        train.setClassIndex(train.numAttributes() - 1);
-        p.buildClassifier(train);
+        data.setClassIndex(data.numAttributes() - 1);
 
-        double errors = 0;
-        for (Instance i : test) {
-
-            errors += (i.classValue() - p.classifyInstance(i)) * (i.classValue() - p.classifyInstance(i));
-            //System.out.println(errors);
+        int numFolds = 10;
+        EvaluationUtils eval = new EvaluationUtils();
+        ArrayList<Prediction> preds
+                = eval.getCVPredictions(p, data, numFolds);
+        int correct = 0;
+        int total = 0;
+        for (Prediction pred : preds) {
+            if (pred.predicted() == pred.actual()) {
+                correct++;
+            }
+            total++;
         }
-        System.out.println("original errors: " + errors);
-        double per = (test.numInstances() - errors) / test.numInstances() * 100;
-        System.out.println("Accuracy: " + per);
+        double acc = ((double) correct / total) * 100;
+
+        System.out.println(acc);
 
     }
 
@@ -199,22 +231,28 @@ public class MachineLearningCw {
         System.out.println("Accuracy: " + per);
     }
 
-    public static void RandomLinearPerceptron(Instances train, Instances test) throws Exception {
+    public static void RandomLinearPerceptron(Instances data) throws Exception {
+        System.out.println("\n ========RandomLinearPerceptron==========");
         RandomLinearPerceptron rlp = new RandomLinearPerceptron();
-        EnchancedPerceptron p = new EnchancedPerceptron();
-        rlp.buildClassifier(train);
+        //EnchancedPerceptron p = new EnchancedPerceptron();
+        //  rlp.buildClassifier(data);
 
-        p.standardizeAtrrbutes(test);
-        double errors = 0;
-        for (Instance i : test) {
-
-            errors += (i.classValue() - rlp.classifyInstance(i)) * (i.classValue() - rlp.classifyInstance(i));
-            //System.out.println(errors);
+        //   p.standardizeAtrrbutes(test);
+        int numFolds = 10;
+        EvaluationUtils eval = new EvaluationUtils();
+        ArrayList<Prediction> preds
+                = eval.getCVPredictions(rlp, data, numFolds);
+        int correct = 0;
+        int total = 0;
+        for (Prediction pred : preds) {
+            if (pred.predicted() == pred.actual()) {
+                correct++;
+            }
+            total++;
         }
-        System.out.println("original errors: " + errors);
-        double per = (test.numInstances() - errors) / test.numInstances() * 100;
-        System.out.println("Accuracy: " + per);
+        double acc = ((double) correct / total) * 100;
 
+        System.out.println("Random Accuracy: " + acc);
     }
 
 }

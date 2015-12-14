@@ -6,6 +6,7 @@
 package machinelearningcw;
 
 import java.util.Arrays;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -15,7 +16,7 @@ import weka.core.Instances;
  *
  * @author adam
  */
-public class perceptronClassifier implements Classifier {
+public class perceptronClassifier extends AbstractClassifier {
 
     double w[];// weights
     int numberofiterations = 100; //stopping condition
@@ -39,16 +40,6 @@ public class perceptronClassifier implements Classifier {
         }
 
         return (y >= 0) ? 1 : 0;
-    }
-
-    @Override
-    public double[] distributionForInstance(Instance instnc) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Capabilities getCapabilities() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public double perceptron(Instances ins) {

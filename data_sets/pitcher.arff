@@ -1,0 +1,23 @@
+@relation pitcher
+
+@attribute pitcherwidth numeric
+@attribute pitcherlength numeric
+@attribute type {N.truncata,N.raja}
+
+@data
+5,13,N.raja
+6,12,N.raja
+9,16,N.truncata
+6,11,N.raja
+6,14,N.truncata
+8,13,N.raja
+5,12,N.raja
+7,14,N.truncata
+4,13,N.raja
+6,15,N.truncata
+5,14,N.raja
+8,15,N.raja
+9,13,N.truncata
+7,15,N.truncata
+8,12,N.truncata
+7,12,N.truncata
