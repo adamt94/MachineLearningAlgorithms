@@ -10,6 +10,7 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Debug.Random;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.experiment.Stats;
@@ -76,9 +77,14 @@ public class EnchancedPerceptron extends AbstractClassifier {
     @Override
     public double classifyInstance(Instance instnc) throws Exception {
         double y = 0;
-      
-        for (int i = 0; i < instnc.numAttributes() - 1; i++) {
-            y += w[i] * (instnc.value(i));
+        //create a new instance so it doesnt change the orginal dataset
+        Instance newInstance = new DenseInstance(instnc);
+        if(setStandardiseAttributes)
+        {
+            standardizeAtrrbutes(newInstance);
+        }
+        for (int i = 0; i < newInstance.numAttributes() - 1; i++) {
+            y += w[i] * (newInstance.value(i));
         }
         
        
@@ -186,6 +192,22 @@ public class EnchancedPerceptron extends AbstractClassifier {
             std[j] = s.stdDev;
         }
 
+    }
+    
+    
+    //method for standardisation a single instance
+     public Instance standardizeAtrrbutes(Instance ins) {
+
+       
+            for (int n = 0; n < ins.numAttributes() - 1; n++) {
+                double x = ((ins.value(n) - means[n]) / std[n]);
+               
+                ins.setValue(n, x);
+                
+            }
+        
+        
+        return ins;
     }
     
 

@@ -7,6 +7,7 @@ package machinelearningcw;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import weka.classifiers.Classifier;
@@ -29,29 +30,56 @@ public class MachineLearningCw {
      */
     
     static ArrayList<String> fileNames;
+    //file for writing the data into excel
+    static FileWriter writer;
     
     public static void main(String[] args) throws Exception {
         //   Instances data = loadData("C:\\Users\\adam\\AppData\\Roaming\\Skype\\My Skype Received Files\\question1-train.arff");
         Instances data [] = getAllFiles();
+      
+        writer = new FileWriter("\\\\ueahome4\\stusci5\\ypf12pxu\\data\\Documents\\Machine Learning\\data.csv");
+        writer.append("DataName");
+        writer.append(",");//next column
+        writer.append("Offline");
+        writer.append(",");
+        writer.append("Online");
+        writer.append(",");
+        writer.append("Offlinestd");
+        writer.append(",");
+        writer.append("Onlinestd");
+        writer.append(",");
+        writer.append("CrossValidation");
+        writer.append(",");
+        writer.append("Ensemble");
+        writer.append(",");
+        writer.append("WEKA1");
+        writer.append(",");
+        writer.append("WEKA2");
+        writer.append("\n");//new row
         for (int i = 0; i < data.length; i++) {
            
             System.out.println("==============="+fileNames.get(i)+"=============");
+            writer.append(fileNames.get(i));
+            writer.append(",");
             data[i].setClassIndex(data[i].numAttributes() - 1);
 
            
             compareAlgorithms(data[i]);
             standardiseData(data[i]);
             crossValidation(data[i]);
+            writer.append("\n");
          //   RandomLinearPerceptron(data);
         }
+        writer.flush();
+        writer.close();
 
    
     }
 
     public static Instances[] getAllFiles() {
-        File folder = new File("data_sets/");
+        File folder = new File("\\\\ueahome4\\stusci5\\ypf12pxu\\data\\Documents\\Machine Learning\\adamt94-machinelearning-da75565f2abe\\adamt94-machinelearning-da75565f2abe\\data_sets/");
         File[] listOfFiles = folder.listFiles();
-        fileNames = new ArrayList();
+        fileNames = new ArrayList<>();
         Instances[] ins = new Instances[listOfFiles.length];
         for (int i = 0; i < listOfFiles.length; i++) {
             if (listOfFiles[i].isFile()) {
@@ -100,6 +128,7 @@ public class MachineLearningCw {
         double acc = ((double) correct / total) * 100;
 
         System.out.println("Offline Accuracy: " + acc);
+        writer.append(acc+",");
 
         perceptronClassifier p = new perceptronClassifier();
         numFolds = 10;
@@ -117,6 +146,7 @@ public class MachineLearningCw {
         acc = ((double) correct / total) * 100;
 
         System.out.println("Online Accury: " + acc);
+        writer.append(acc+",");
     }
 
     public static void standardiseData(Instances data) throws Exception {
@@ -143,7 +173,7 @@ public class MachineLearningCw {
         double acc = ((double) correct / total) * 100;
 
         System.out.println("Offline Accuracy: " + acc);
-
+        writer.append(acc+",");
         ep.onlineoroffline = true;
 
         numFolds = 10;
@@ -161,6 +191,7 @@ public class MachineLearningCw {
         acc = ((double) correct / total) * 100;
 
         System.out.println("Online Accury: " + acc);
+        writer.append(acc+",");
     }
 
     public static void crossValidation(Instances data) throws Exception {
@@ -185,8 +216,10 @@ public class MachineLearningCw {
         double acc = ((double) correct / total) * 100;
         if (ep.onlineoroffline) {
             System.out.println("picked: online " + "Accuracy " + acc);
+              writer.append(acc+",");
         } else {
             System.out.println("picked: offline " + "Accuracy " + acc);
+            writer.append(acc+",");
         }
     }
 
