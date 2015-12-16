@@ -10,9 +10,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.classifiers.evaluation.Prediction;
+import weka.classifiers.functions.LinearRegression;
+import weka.classifiers.functions.Logistic;
+import weka.classifiers.functions.MultilayerPerceptron;
+import weka.classifiers.functions.SimpleLogistic;
+import weka.classifiers.functions.VotedPerceptron;
 import weka.core.Capabilities;
 import weka.core.Debug;
 import weka.core.Instance;
@@ -28,16 +34,16 @@ public class MachineLearningCw {
      * @param args the command line arguments
      * @throws java.lang.Exception
      */
-    
+    //array of all the dataset names
     static ArrayList<String> fileNames;
     //file for writing the data into excel
     static FileWriter writer;
-    
+
     public static void main(String[] args) throws Exception {
         //   Instances data = loadData("C:\\Users\\adam\\AppData\\Roaming\\Skype\\My Skype Received Files\\question1-train.arff");
-        Instances data [] = getAllFiles();
-      
-        writer = new FileWriter("\\\\ueahome4\\stusci5\\ypf12pxu\\data\\Documents\\Machine Learning\\data.csv");
+        Instances data[] = getAllFiles();
+
+        writer = new FileWriter("C:\\Users\\adam\\Documents\\Machine_Learning\\data.csv");
         writer.append("DataName");
         writer.append(",");//next column
         writer.append("Offline");
@@ -57,37 +63,91 @@ public class MachineLearningCw {
         writer.append("WEKA2");
         writer.append("\n");//new row
         for (int i = 0; i < data.length; i++) {
-           
-            System.out.println("==============="+fileNames.get(i)+"=============");
+
+            System.out.println("===============" + fileNames.get(i) + "=============");
             writer.append(fileNames.get(i));
             writer.append(",");
             data[i].setClassIndex(data[i].numAttributes() - 1);
+            //1. Is one learning algorithm better than the other?
+            //   compareAlgorithms(data[i]);
+            //2. Does standardising the data produce a more accurate classifier? You can test this on both learningalgorithms.
 
-           
-            compareAlgorithms(data[i]);
-            standardiseData(data[i]);
-            crossValidation(data[i]);
+            //  standardiseData(data[i]);
+            //3. Does choosing the learning algorithm through cross validation produce a more accurate classifier?
+            //   crossValidation(data[i]);
+            // 4. Does using an ensemble produce a more accurate classifier?
+            //     ensemble(data[i]);
+
+            /*5. Weka contains several related classifiers in the package weka.classifiers.functions. 
+             Comparetwo of your classifiers (including the ensemble) to at least two of the following*/
+//            VotedPerceptron mp = new VotedPerceptron();
+//            
+//            int numFolds = 10;
+//            EvaluationUtils eval = new EvaluationUtils();
+//            ArrayList<Prediction> preds
+//                    = eval.getCVPredictions(mp, data[i], numFolds);
+//            int correct = 0;
+//            int total = 0;
+//            for (Prediction pred : preds) {
+//                if (pred.predicted() == pred.actual()) {
+//                    correct++;
+//                }
+//                total++;
+//            }
+//            double acc = ((double) correct / total);
+//
+//            System.out.println("Logistic Accuracy: " + acc);
+//            writer.append(acc + ",");
+            int j = data[i].numClasses();
+            writer.append(j + ",");
             writer.append("\n");
-         //   RandomLinearPerceptron(data);
+
         }
+        /*=======================================================
+                         TIMING EXPIREMENT
+        =========================================================
+        */
+          //create all the classifiers
+        perceptronClassifier online = new perceptronClassifier();
+        EnchancedPerceptron offline = new EnchancedPerceptron();
+        EnchancedPerceptron onlinestd = new EnchancedPerceptron();
+        onlinestd.setStandardiseAttributes = true;
+        EnchancedPerceptron offlinestd = new EnchancedPerceptron();
+        offlinestd.setStandardiseAttributes = true;
+        EnchancedPerceptron crossvalidate = new EnchancedPerceptron();
+        crossvalidate.setStandardiseAttributes = true;
+        RandomLinearPerceptron random = new RandomLinearPerceptron();
+        Logistic l = new Logistic();
+        SimpleLogistic sl = new SimpleLogistic();
+        MultilayerPerceptron mp = new MultilayerPerceptron();
+        VotedPerceptron vp = new VotedPerceptron();
+    //    timingExperiment(online, data);
+      //  timingExperiment(offline, data);
+        //timingExperiment(onlinestd, data);
+        //timingExperiment(offlinestd, data);
+        //timingExperiment(crossvalidate, data);
+        //timingExperiment(random, data);
+        //timingExperiment(l, data);
+        //timingExperiment(sl, data);
+        timingExperiment(mp, data);
+        timingExperiment(vp, data);
         writer.flush();
         writer.close();
 
-   
     }
 
     public static Instances[] getAllFiles() {
-        File folder = new File("\\\\ueahome4\\stusci5\\ypf12pxu\\data\\Documents\\Machine Learning\\adamt94-machinelearning-da75565f2abe\\adamt94-machinelearning-da75565f2abe\\data_sets/");
+        File folder = new File("data_sets/");
         File[] listOfFiles = folder.listFiles();
         fileNames = new ArrayList<>();
         Instances[] ins = new Instances[listOfFiles.length];
         for (int i = 0; i < listOfFiles.length; i++) {
             if (listOfFiles[i].isFile()) {
                 //get the names of all the datasets
-               fileNames.add(listOfFiles[i].getName());
-               //gets all the datasets paths and loads the data into instances
+                fileNames.add(listOfFiles[i].getName());
+                //gets all the datasets paths and loads the data into instances
                 ins[i] = loadData(listOfFiles[i].getPath());
-               
+
             }
         }
         return ins;
@@ -105,6 +165,7 @@ public class MachineLearningCw {
         return instances;
     }
 
+    //1. Is one learning algorithm better than the other?
     public static void compareAlgorithms(Instances data) throws Exception {
         System.out.println("Compare Algorithms");
         EnchancedPerceptron ep = new EnchancedPerceptron();
@@ -125,10 +186,10 @@ public class MachineLearningCw {
             }
             total++;
         }
-        double acc = ((double) correct / total) * 100;
+        double acc = ((double) correct / total);
 
         System.out.println("Offline Accuracy: " + acc);
-        writer.append(acc+",");
+        writer.append(acc + ",");
 
         perceptronClassifier p = new perceptronClassifier();
         numFolds = 10;
@@ -143,12 +204,13 @@ public class MachineLearningCw {
             }
             total++;
         }
-        acc = ((double) correct / total) * 100;
+        acc = ((double) correct / total);
 
         System.out.println("Online Accury: " + acc);
-        writer.append(acc+",");
+        writer.append(acc + ",");
     }
 
+    //2. Does standardising the data produce a more accurate classifier? You can test this on both learningalgorithms.
     public static void standardiseData(Instances data) throws Exception {
         System.out.println("\n" + "Compare Algorithms with standiasation");
         EnchancedPerceptron ep = new EnchancedPerceptron();
@@ -170,10 +232,10 @@ public class MachineLearningCw {
             }
             total++;
         }
-        double acc = ((double) correct / total) * 100;
+        double acc = ((double) correct / total);
 
         System.out.println("Offline Accuracy: " + acc);
-        writer.append(acc+",");
+        writer.append(acc + ",");
         ep.onlineoroffline = true;
 
         numFolds = 10;
@@ -188,12 +250,13 @@ public class MachineLearningCw {
             }
             total++;
         }
-        acc = ((double) correct / total) * 100;
+        acc = ((double) correct / total);
 
         System.out.println("Online Accury: " + acc);
-        writer.append(acc+",");
+        writer.append(acc + ",");
     }
 
+    //3. Does choosing the learning algorithm through cross validation produce a more accurate classifier?
     public static void crossValidation(Instances data) throws Exception {
         System.out.println("\n" + "CrossValidation");
         EnchancedPerceptron ep = new EnchancedPerceptron();
@@ -213,15 +276,84 @@ public class MachineLearningCw {
             }
             total++;
         }
-        double acc = ((double) correct / total) * 100;
+        double acc = ((double) correct / total);
         if (ep.onlineoroffline) {
             System.out.println("picked: online " + "Accuracy " + acc);
-              writer.append(acc+",");
+            writer.append(acc + ",");
         } else {
             System.out.println("picked: offline " + "Accuracy " + acc);
-            writer.append(acc+",");
+            writer.append(acc + ",");
         }
     }
+
+    // 4. Does using an ensemble produce a more accurate classifier?
+    public static void ensemble(Instances data) throws Exception {
+        System.out.println("====ensemble method=====");
+        RandomLinearPerceptron rlp = new RandomLinearPerceptron();
+        int numFolds = 10;
+        EvaluationUtils eval = new EvaluationUtils();
+        ArrayList<Prediction> preds
+                = eval.getCVPredictions(rlp, data, numFolds);
+        int correct = 0;
+        int total = 0;
+        for (Prediction pred : preds) {
+            if (pred.predicted() == pred.actual()) {
+                correct++;
+            }
+            total++;
+        }
+        double acc = ((double) correct / total);
+        writer.append(acc + ",");
+
+        System.out.println("Random Accuracy: " + acc);
+
+    }
+
+    public static void wekaClassifiers() {
+        Logistic l = new Logistic();
+        SimpleLogistic sl = new SimpleLogistic();
+        MultilayerPerceptron mp = new MultilayerPerceptron();
+        VotedPerceptron vp = new VotedPerceptron();
+    }
+
+    public static void timingExperiment(Classifier s, Instances[] data) throws Exception {
+        
+      
+
+        /* get the biggest data set */
+        Instances largestData = data[0];
+        for (int i = 0; i < data.length; i++) {
+            if (largestData.numInstances() < data[i].numInstances()) {
+                largestData = data[i];
+            }
+        }
+        for (int i = 1; i <= 7; i++) {
+            int percent =i* 10;
+            int train_size = (int) Math.round(largestData.numInstances() * percent / 100);
+            int testSize = largestData.numInstances() - train_size;
+            Instances train = new Instances(largestData, 0, train_size);
+            Instances test = new Instances(largestData, train_size, testSize);
+
+            long t1 = System.currentTimeMillis();
+
+          
+                s.buildClassifier(train);
+                for (Instance ins : test) {
+                    s.classifyInstance(ins);
+                }
+
+            
+            long t2 = System.currentTimeMillis() - t1;
+            //change to seconds
+
+            System.out.println("TIME TAKEN " + i + ": " + t2);
+            
+        }
+        System.out.println("\n");
+    }
+    /*============================================================== 
+     Methods to test each Classifier
+     ==============================================================*/
 
     public static void perceptron(Instances data) throws Exception {
         perceptronClassifier p = new perceptronClassifier();
@@ -239,7 +371,7 @@ public class MachineLearningCw {
             }
             total++;
         }
-        double acc = ((double) correct / total) * 100;
+        double acc = ((double) correct / total);
 
         System.out.println(acc);
 
@@ -260,17 +392,13 @@ public class MachineLearningCw {
             //System.out.println(errors);
         }
         System.out.println("original errors: " + errors);
-        double per = (test.numInstances() - errors) / test.numInstances() * 100;
+        double per = (test.numInstances() - errors) / test.numInstances();
         System.out.println("Accuracy: " + per);
     }
 
     public static void RandomLinearPerceptron(Instances data) throws Exception {
         System.out.println("\n ========RandomLinearPerceptron==========");
         RandomLinearPerceptron rlp = new RandomLinearPerceptron();
-        //EnchancedPerceptron p = new EnchancedPerceptron();
-        //  rlp.buildClassifier(data);
-
-        //   p.standardizeAtrrbutes(test);
         int numFolds = 10;
         EvaluationUtils eval = new EvaluationUtils();
         ArrayList<Prediction> preds
@@ -283,7 +411,7 @@ public class MachineLearningCw {
             }
             total++;
         }
-        double acc = ((double) correct / total) * 100;
+        double acc = ((double) correct / total);
 
         System.out.println("Random Accuracy: " + acc);
     }

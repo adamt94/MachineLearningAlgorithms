@@ -24,7 +24,7 @@ public class EnchancedPerceptron extends AbstractClassifier {
     public double w[];// weights
     public int numberofiterations = 100; //stopping condition
     public double learning_rate = 1;  //learning rate
-    public boolean setCrossvalidate = true;//set crossvalidation
+    public boolean setCrossvalidate = false;//set crossvalidation
     public boolean setStandardiseAttributes = false; // set stdandisation
     public boolean onlineoroffline = false; //decides which algorithm to pick offline/online
 
@@ -177,7 +177,10 @@ public class EnchancedPerceptron extends AbstractClassifier {
         
 
     }
-
+    
+    
+/*method that uses the stats class to calculate 
+    the mean and standard divation for the instacnes passed*/
     public void calculateMeansAndSTDev(Instances instances) {
           means = new double[instances.numAttributes() - 1];//intialize means
         std = new double[instances.numAttributes() - 1];//intialize stdevs
