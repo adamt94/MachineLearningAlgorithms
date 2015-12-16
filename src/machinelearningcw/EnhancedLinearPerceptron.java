@@ -19,18 +19,19 @@ import weka.experiment.Stats;
  *
  * @author ypf12pxu
  */
-public class EnchancedPerceptron extends AbstractClassifier {
+public class EnhancedLinearPerceptron extends AbstractClassifier {
 
     public double w[];// weights
     public int numberofiterations = 100; //stopping condition
     public double learning_rate = 1;  //learning rate
     public boolean setCrossvalidate = false;//set crossvalidation
     public boolean setStandardiseAttributes = false; // set stdandisation
-    public boolean onlineoroffline = false; //decides which algorithm to pick offline/online
+    //decides which algorithm to pick offline/online
+    public boolean onlineoroffline = false; 
 
     public double means[];// the means for each attribute 
     public double std[]; //the standard deviations for each attribute
-    public int noOfiterations = 1;//stopping condition
+
 
     @Override
     public void buildClassifier(Instances i) throws Exception {
@@ -41,7 +42,7 @@ public class EnchancedPerceptron extends AbstractClassifier {
             onlineoroffline = crossValidation(i);
         }
       //  System.out.println("using online: "+ crossvalidate);
-        Arrays.fill(w, 1);//sets all values to 1 should be radomised
+        Arrays.fill(w, 1);//sets all values to 1 
 
         // System.out.println(crossvalidate);
         //crossvalidate = false;
@@ -117,7 +118,9 @@ public class EnchancedPerceptron extends AbstractClassifier {
 
                 for (int j = 0; j < ins.numAttributes() - 1; j++) {
 
-                    changeinWeights[j] = changeinWeights[j] + (0.5 * learning_rate) * ((difference) * instance.value(j));
+                    changeinWeights[j] = changeinWeights[j] + 
+                            (0.5 * learning_rate) * ((difference)
+                            * instance.value(j));
 
                 }
                 error_count += (difference * difference);
@@ -128,7 +131,9 @@ public class EnchancedPerceptron extends AbstractClassifier {
                 System.out.print("w[" + j + "]: " + changeinWeights[j] + "|");
             }
             System.out.println("");*/
-
+            
+            
+            //update all the weights at the end 
             for (int j = 0; j < w.length; j++) {
 
                 w[j] += changeinWeights[j];

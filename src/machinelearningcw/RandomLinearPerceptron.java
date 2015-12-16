@@ -24,6 +24,7 @@ import weka.filters.unsupervised.attribute.Remove;
 public class RandomLinearPerceptron implements Classifier {
 
     perceptronClassifier ensemble[];
+    //array to record all the attributes deleted
     Integer attributesdeleted[][];
 
     @Override
@@ -56,17 +57,21 @@ public class RandomLinearPerceptron implements Classifier {
         }
         for (int i = 0; i < ensemble.length; i++) {
             newInstance = new DenseInstance(instnc);
+            //sort in reverse order to stop out of bounds exception
             Arrays.sort(attributesdeleted[i], Collections.reverseOrder());
             for(int j =0; j<attributesdeleted[i].length;j++)
             {
-               // System.out.println("ATTEMPTING TO DELETE: "+attributesdeleted[i][j]);
+              /* System.out.println("ATTEMPTING TO DELETE: 
+                "+attributesdeleted[i][j]);*/
               //  System.out.println(newInstance.numAttributes()-1);
+                
+                //delete the attributes deleted in the buildclassify method
                 newInstance.deleteAttributeAt(attributesdeleted[i][j]);
                 
                
             }
              
-            
+            //add up all the predictions classified in the ensemble
             double result = ensemble[i].classifyInstance(newInstance);
             if(result == 0)
             {
@@ -82,15 +87,17 @@ public class RandomLinearPerceptron implements Classifier {
 
     @Override
     public Capabilities getCapabilities() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     public void randomLinearPerceptron(Instances ins) throws Exception {
         ensemble = new perceptronClassifier[500]; //default size 500
-        //get the amount of attributes to remove
-      
+        
       //  System.out.println(ins.numAttributes()-1);
-        int removeAttributes =((ins.numAttributes()-1) - (int) Math.sqrt(ins.numAttributes() - 1));
+        //get the amount of attributes to remove
+        int removeAttributes =((ins.numAttributes()-1) - 
+                (int) Math.sqrt(ins.numAttributes() - 1));
     //    System.out.println(removeAttributes);
       
         //initialise the array for storing the attributes removed
@@ -99,18 +106,20 @@ public class RandomLinearPerceptron implements Classifier {
         for (int i = 0; i < ensemble.length; i++) {
             ensemble[i] = new perceptronClassifier();
           //  System.out.println("length: "+ensemble.length);
-            //build the classifier with the random attributes
+            //build the classifier with the random attributes removed
             
-            ensemble[i].buildClassifier(randomAttributes(ins, i, removeAttributes));
-          //  System.out.println("============== " + 0);
+            ensemble[i].buildClassifier
+        (randomAttributes(ins, i, removeAttributes));
+         
         }
 
     }
 
-    public Instances randomAttributes(Instances ins, int position, int removeAttributes) throws Exception {
+    public Instances randomAttributes(Instances ins, int position, 
+            int removeAttributes) throws Exception {
         Instances newInstances; //new instances with the attributes removed
-        
-        ArrayList<Integer> remove = new ArrayList<>();//arraylist to remove attributes positions
+        //arraylist to remove attributes positions
+        ArrayList<Integer> remove = new ArrayList<>();
         Remove r = new Remove();//class to remove attributes
      
         for (int i = 0; i < ins.numAttributes() - 1; i++) {

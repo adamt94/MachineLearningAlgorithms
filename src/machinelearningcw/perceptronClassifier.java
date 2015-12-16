@@ -64,14 +64,20 @@ public class perceptronClassifier extends AbstractClassifier {
 
                 double difference = instance.classValue() - match;
 
-                //  System.out.println("class value: " + instance.classValue() + "  "+match+"  " + difference + "difference");
+                //  System.out.println("class value: " + instance.classValue() 
+                //+ "  "+match+"  " + difference + "difference");
                 //System.out.println(match);
                 for (int j = 0; j < ins.numAttributes() - 1; j++) {
-                    //    System.out.println("BEFORRRRRRRRRREE");
-                    //   System.out.println("w[" + j + "] = " + w[j] + " + " + "0.5 " + " * " + learning_rate + " * " + difference + " * " + instance.value(j));
-                    w[j] = w[j] + (0.5 * learning_rate * difference * instance.value(j));
-                    //    System.out.println("AFTERRR");
-                    //   System.out.println("w[" + j + "] = " + w[j] + " + " + "0.5 " + " * " + learning_rate + " * " + difference + " * " + instance.value(j));
+                
+                    //   System.out.println("w[" + j + "] = " + w[j] + " 
+                    //+ " + "0.5 " + " * " + learning_rate + " * " + difference
+                    //+ " * " + instance.value(j));
+                    w[j] = w[j] + (0.5 * learning_rate * 
+                            difference * instance.value(j));
+                   
+                    /*   System.out.println("w[" + j + "] = " + w[j] + " +
+                            " + "0.5 " + " * " + learning_rate + " * " 
+                            + difference + " * " + instance.value(j));*/
 
                 }
                 error_count += (difference * difference);
